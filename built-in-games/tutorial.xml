@@ -1,26 +1,34 @@
-<root>
-    <manifest
+<game>
+    <info
         api="1.0"
         ver="0.1"
         name="Tutorial"
         description="This is a tutorial game"
         author="Wasteland Fluttershy"
     />
-    <game>
-        <state> <!-- game state goes here -->
 
-        </state>
+    <state> <!-- game state goes here -->
+        <inventory type="array" items="matches_01"/>
+    </state>
 
-        <scenes> <!-- scenes go here -->
+    <scenes> <!-- scenes go here -->
 
-        </scenes>
+    </scenes>
 
-        <actors> <!-- other objects go here -->
+    <actors> <!-- other objects go here -->
 
-        </actors>
+    </actors>
 
-        <scripts> <!-- game logic goes here -->
+    <items>
+        <item id="matches_01"/>
+    </items>
 
-        </scripts>
-    </game>
-</root>
+    <scripts> <!-- game logic goes here -->
+        <start>
+            <script type="print">
+
+            </script>
+        </start>
+
+    </scripts>
+</game>
