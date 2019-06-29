@@ -20,17 +20,21 @@
     </actors>
 
     <items>
-        <item id="matches_01"/>
+        <item
+            id="matches_01"
+            description="A box of perfectly good matches. Says on the box 'Keep away from children'. Makes you think for a moment whether to keep them or not"/>
         <item
             id="table_01"
-            description="simple table"
+            description="simple table, four legs, no arms. Doesn't look suspesious..."
         />
     </items>
 
     <scripts> <!-- game logic goes here -->
         <start>
             <script type="print">
-                <t>You are in a dark room... You see a <item id="table_01"/> in front of you</t>
+                <t>You are in a dark room... You see a </t>
+                <item id="table_01"/>
+                <t> in front of you</t>
             </script>
         </start>
 
