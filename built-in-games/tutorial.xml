@@ -21,6 +21,6 @@
 
         <scripts> <!-- game logic goes here -->
 
-        <scripts>
+        </scripts>
     </game>
 </root>
