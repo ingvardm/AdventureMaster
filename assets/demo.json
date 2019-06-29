@@ -1,0 +1,47 @@
+{
+    "STATE": {
+        "counter": 0,
+        "switch": false
+    },
+    "ROOMS": {
+        "room_a": {
+            "SHORT_DESC": "string",
+            "LONG_DESC": "string",
+            "NAME": "Room A",
+            "CONTAINS": [
+                "sample_drawer",
+                "sample_door"
+            ]
+        }
+    },
+    "CONTAINERS": {
+
+    },
+    "ITEMS": {
+        "sample_drawer": {
+            "TYPE": "container",
+            "CONTAINS": [
+                "sample_key"
+            ]
+        },
+        "sample_key": {
+            "TYPE": "item"
+        },
+        "sample_door": {
+            "TYPE": "actor",
+            "LOCKED": true,
+            "SCRIPTS": {
+                "$unlock": [
+                    {
+                        "SAY": []
+                    }
+                ]
+            },
+            "INTERACTIONS": {
+                "USE_WITH": {
+                    "sample_key": "$unlock"
+                }
+            }
+        }
+    }
+}
