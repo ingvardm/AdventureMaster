@@ -1,0 +1,26 @@
+<root>
+    <manifest
+        api="1.0"
+        ver="0.1"
+        name="Tutorial"
+        description="This is a tutorial game"
+        author="Wasteland Fluttershy"
+    />
+    <game>
+        <state> <!-- game state goes here -->
+
+        </state>
+
+        <scenes> <!-- scenes go here -->
+
+        </scenes>
+
+        <actors> <!-- other objects go here -->
+
+        </actors>
+
+        <scripts> <!-- game logic goes here -->
+
+        <scripts>
+    </game>
+</root>
