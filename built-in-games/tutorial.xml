@@ -30,9 +30,7 @@
     <scripts> <!-- game logic goes here -->
         <start>
             <script type="print">
-                <t>You are in a dark room... You see a </t>
-                <item id="table_01"/>
-                <t> in front of you</t>
+                <t>You are in a dark room... You see a <item id="table_01"/> in front of you</t>
             </script>
         </start>
 
