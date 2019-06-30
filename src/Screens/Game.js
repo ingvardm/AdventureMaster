@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import Screen from '../Components/Screen'
 import FixedHeader from '../Components/FixedHeader'
-import { ScreenTitle, Label, Link } from '../Components/Labels'
+import { ScreenTitle, Label, Link, Info } from '../Components/Labels'
 import ScrollContainer from '../Components/ScrollContainer'
 import HeaderBackButton from '../Components/HeaderBackButton'
 import { fetchGame } from '../services/api'
@@ -139,8 +139,6 @@ export default class Game extends PureComponent {
     renderMessageParts = items => {
         let parts = []
 
-        console.log(items)
-
         items.forEach((item, index) => {
             const key = String(index)
     
@@ -148,7 +146,6 @@ export default class Game extends PureComponent {
             splitLine.forEach((part, index) => {
                 if(part.length){
                     const combinedKey = `${key}-${index}`
-                    console.log('>>>',part)
                     switch (part.charAt(0)) {
                         case '$': // script
                             const [scriptId, text] = part.substring(1).split(':')
@@ -165,12 +162,17 @@ export default class Game extends PureComponent {
                             parts.push(<Link
                                 key={combinedKey}
                                 onPress={() => {
-                                    this.addGameMessage([this.gameItems[itemId].description])
-                                    this.gameScripts[this.gameItems[itemId].interactionScriptId]()
+                                    this.addGameMessage([`{{!${this.gameItems[itemId].description}}}`])
+                                        .then(this.gameScripts[this.gameItems[itemId].interactionScriptId])
                                 }}>
                                     {this.gameItems[itemId].name}
                                 </Link>
                                 )
+                            break;
+
+                        case "!": // info
+                            const infoMessage = part.substring(1)
+                            parts.push(<Info key={combinedKey}>{infoMessage}</Info>)
                             break;
                     
                         default:  parts.push(<Label key={combinedKey}>{part}</Label>)
@@ -183,17 +185,14 @@ export default class Game extends PureComponent {
     }
 
     addGameMessage = message => {
-        console.log('adding message ', message)
         const { gameMessages } = this.state
         const newMessagesArray = [...gameMessages]
 
-        newMessagesArray.push(<View key={String(this.gameLastMessageId++)}>
+        newMessagesArray.push(<View key={String(this.gameLastMessageId++)} style={styles.entry}>
             {this.renderMessageParts(message)}
         </View>)
 
-        this.setState({
-            gameMessages: newMessagesArray
-        })
+        return new Promise(res => this.setState({ gameMessages: newMessagesArray }, res))
     }
 
     render() {
@@ -218,13 +217,15 @@ export default class Game extends PureComponent {
 
 const styles = StyleSheet.create({
     content: {
-        padding: 24,
+        paddingHorizontal: 24,
+        paddingVertical: 8
     },
     errorMessage: {
         marginTop: 64,
         alignSelf: 'center'
     },
     entry: {
-        width: '100%'
+        width: '100%',
+        marginTop: 16
     }
 })

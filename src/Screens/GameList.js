@@ -7,11 +7,30 @@ import HeaderBackButton from '../Components/HeaderBackButton'
 import gamesList from '../built-in-games.json'
 import Button from '../Components/Buttons'
 import { StyleSheet } from 'react-native'
+import Spinner from '../Components/Spinner'
+import { fetchGamesList } from '../services/api'
 
 export default class GamesList extends PureComponent {
-    goBack = () => this.props.navigation.goBack()
+    state = {
+        loading: true
+    }
 
     _gameList = [...gamesList]
+
+    componentDidMount(){
+        fetchGamesList()
+            .then(this.onGotGames)
+    }
+
+    onGotGames = games => {
+        console.log('got games', games)
+        this._gameList = [...games]
+        this.setState({
+            loading: false
+        })
+    }
+
+    goBack = () => this.props.navigation.goBack()
 
     _gameListKeyExtractor = (_, index) => String(index)
 
@@ -22,10 +41,13 @@ export default class GamesList extends PureComponent {
     }
 
     render() {
+        const { loading } = this.state
+
         return (
         <Screen>
             <FixedHeader
-                left={<HeaderBackButton onPress={this.goBack}/>}>
+                left={<HeaderBackButton onPress={this.goBack}/>}
+                right={loading ? <Spinner/> : null}>
                 <ScreenTitle>Games</ScreenTitle>
             </FixedHeader>
             <StaticList
