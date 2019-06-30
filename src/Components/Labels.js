@@ -1,17 +1,22 @@
 import React from 'react'
-import { Text, StyleSheet, View } from 'react-native'
+import { Text, StyleSheet, View, TouchableOpacity } from 'react-native'
 
 export const Label = props => <Text {...props} style={[styles.default, props.style]}/>
 
-export const Link = props => <Label {...props} style={[styles.link, props.style]}/>
+export const Link = ({onPress, ...props}) => <TouchableOpacity
+    hitSlop={{top: 4, bottom: 4, left: 4, right: 4}}
+    onPress={onPress}>
+    <Label {...props} style={[styles.link, styles.bold, props.style]}/>
+</TouchableOpacity>
 
 export const ScreenTitle = props => <Label {...props} style={styles.screenTitle}/>
 
 const styles = StyleSheet.create({
     default: {
-        color: '#eeeeee',
-        fontSize: 16,
-        fontWeight: '500',
+        color: '#cccccc',
+        fontSize: 18,
+        lineHeight: 28,
+        fontWeight: '400',
     },
     bold: {
         fontWeight: '600',
@@ -20,7 +25,8 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     screenTitle: {
-        fontSize: 22,
+        fontSize: 32,
+        lineHeight: 64
     },
 
 })

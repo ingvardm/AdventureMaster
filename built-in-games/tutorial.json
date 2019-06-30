@@ -1,0 +1,40 @@
+{
+    "info": {
+        "api": "1.0",
+        "ver": "0.1",
+        "name": "Tutorial",
+        "description": "This is a tutorial game",
+        "author": "Wasteland Fluttershy"
+    },
+    "state": {
+        "inventory": [
+            "matches_01"
+        ]
+    },
+    "items": {
+        "matches_01": {
+            "name": "box of matches",
+            "description": "A box of perfectly good matches. Says on the box \"Keep away from children\". Makes you think for a moment whether to keep them or not"
+        },
+        "table_01": {
+            "name": "table",
+            "description": "simple table, four legs, no arms. Doesn't look suspesious... to you, anyway..."
+        }
+    },
+    "start": "start_script_01",
+    "scripts": {
+        "start_script_01": {
+            "type": "message",
+            "message": [
+                "Welcome to the tutorial, tap the action below to start the game.",
+                "{{$start_script_02:Start the game}}"
+            ]
+        },
+        "start_script_02": {
+            "type": "message",
+            "message": [
+                "You are in a dark room... You see a {{#table_01}} in front of you."
+            ]
+        }
+    }
+}

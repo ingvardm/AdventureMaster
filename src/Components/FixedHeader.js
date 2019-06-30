@@ -29,14 +29,14 @@ const styles = StyleSheet.create({
     },
     sectionLeft: {
         justifyContent: 'flex-start',
-        paddingLeft: 16
+        paddingLeft: 24
     },
     sectionCenter: {
         justifyContent: 'center'
     },
     sectionRight: {
         justifyContent: 'flex-end',
-        paddingRight: 16
+        paddingRight: 24
     }
 })
 

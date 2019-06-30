@@ -1,19 +1,59 @@
 import React, { PureComponent } from 'react'
 import Screen from '../Components/Screen'
 import FixedHeader from '../Components/FixedHeader'
-import { ScreenTitle, Label } from '../Components/Labels'
+import { ScreenTitle, Label, Link } from '../Components/Labels'
 import ScrollContainer from '../Components/ScrollContainer'
 import HeaderBackButton from '../Components/HeaderBackButton'
 import { fetchGame } from '../services/api'
 import {xml2objAsync} from '../utils/xml-utils'
 import Spinner from '../Components/Spinner'
+import { StyleSheet, View } from 'react-native'
+import { XML_KEYS } from '../utils/xml-utils'
+
+class GameEntry extends PureComponent {
+    _renderPart(part, index){
+        const { type } = part
+
+        switch (part.type) {
+            case XML_KEYS.CHILDREN:
+                
+                break;
+            case XML_KEYS.TEXT:
+            
+                break;
+
+            case XML_KEYS.ATTRIBUTES:
+        
+                break;
+        
+            default: throw `${type} is not a valid type must be one of [${Object.values(XML_KEYS)}]`
+        }
+    }
+
+    render(){
+        const { content } = this.props
+        return <View style={styles.entry}>
+            {content.map(_renderPart)}
+        </View>
+    }
+}
 
 export default class Game extends PureComponent {
     state = {
         loading: true,
         title: '',
-        error: null
+        error: null,
+        gameMessages: [],
+        gameInventory: [],
+        userKnownKeywords: [],
+        gameOver: false,
+        gameWon: false,
     }
+
+    gameItems = {}
+    gameScripts = {}
+    gameStartingScriptId = null
+    gameLastMessageId = 0
 
     componentDidMount(){
         const {url, title} = this.props.navigation.getParam('game');
@@ -39,15 +79,116 @@ export default class Game extends PureComponent {
         }
     }
 
-    loadGame = (game) => {
+    loadGame = ({game}) => {
+        const { items, info, scripts, actors, scenes, state, start } = game
         console.log(game)
+        this.loadGameScripts(scripts.script, start.script.id)
+        this.loadGameItems(items.item)
+        // this.loadGameState(state[XML_KEYS.CHILDREN])
+        // this.loadGameActors(actors[XML_KEYS.CHILDREN])
+        // this.loadGameScenes(scenes[XML_KEYS.CHILDREN])
+        this.finalizeGameLoading()
+    }
+
+    loadGameScripts = (scripts, startingScriptId) => {
+        this.gameStartingScriptId = startingScriptId
+
+        scripts.forEach(script => {
+            const { type, id, message } = script
+
+            switch (type) {
+                case 'message':
+                    this.gameScripts[id] = () => this.addGameMessage(message)
+                    break;
+            
+                default:
+                    break;
+            }
+        })
+        console.log('scripts loaded ', this.gameScripts)
+    }
+
+    loadGameState = state => {
+
+    }
+
+    loadGameItems = items => {
+        
+        console.log('loading items ', items)
+    }
+
+    loadGameActors = actors => {
+
+    }
+
+    loadGameScenes = scenes => {
+
+    }
+
+    finalizeGameLoading = () => {
         this.setState({
             loading: false
+        })
+        this.runStartScript()
+    }
+
+    runStartScript = () => {
+        this.gameScripts[this.gameStartingScriptId]()
+    }
+
+    renderMessageParts = items => {
+        let parts = []
+
+        console.log(items)
+
+        if(Array.isArray(items)){
+            items.forEach((item, index) => {
+                const key = String(index)
+        
+                const splitLine = item.split(/{{|}}/)
+                splitLine.forEach((part, index) => {
+                    if(part.length){
+                        const combinedKey = `${key}-${index}`
+                        console.log('>>>',part)
+                        switch (part.charAt(0)) {
+                            case '$': // script
+                                const [scriptId, text] = part.substring(1).split(':')
+                                parts.push(<Link
+                                    key={combinedKey}
+                                    onPress={this.gameScripts[scriptId]}>
+                                        {text}
+                                    </Link>
+                                    )
+                                break;
+                        
+                            default:  parts.push(<Label key={combinedKey}>{part}</Label>)
+                        }
+                    } 
+                })
+            })
+
+            return parts
+        } else {
+            return <Label>{items}</Label>
+        }
+    }
+
+    addGameMessage = message => {
+        console.log('adding message ', message)
+        const { gameMessages } = this.state
+        const newMessagesArray = [...gameMessages]
+
+        newMessagesArray.push(<View key={String(this.gameLastMessageId++)}>
+            {this.renderMessageParts(message.line)}
+        </View>)
+
+        this.setState({
+            gameMessages: newMessagesArray
         })
     }
 
     render() {
-        const { title, loading, error } = this.state
+        const { title, loading, error, gameMessages } = this.state
 
         return (
         <Screen>
@@ -57,11 +198,24 @@ export default class Game extends PureComponent {
                 >
                 <ScreenTitle>{title}</ScreenTitle>
             </FixedHeader>
-            <ScrollContainer>
-                {error && <Label>Tere was an error</Label>}
-
+            <ScrollContainer style={styles.content}>
+                {error && <Label>error: {error.message}</Label>}
+                {gameMessages}
             </ScrollContainer>
         </Screen>
         )
     }
 }
+
+const styles = StyleSheet.create({
+    content: {
+        padding: 24,
+    },
+    errorMessage: {
+        marginTop: 64,
+        alignSelf: 'center'
+    },
+    entry: {
+        width: '100%'
+    }
+})
