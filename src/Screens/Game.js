@@ -67,9 +67,8 @@ export default class Game extends PureComponent {
 
     fetchGame = async url => {
         try {
-            const gameXML = await fetchGame(url)
-            const parsedGame = await xml2objAsync(gameXML)
-            this.loadGame(parsedGame)
+            const gameJson = await fetchGame(url)
+            this.loadGame(gameJson)
         } catch(error){
             console.warn(error)
             this.setState({
@@ -79,11 +78,11 @@ export default class Game extends PureComponent {
         }
     }
 
-    loadGame = ({game}) => {
+    loadGame = (game) => {
         const { items, info, scripts, actors, scenes, state, start } = game
         console.log(game)
-        this.loadGameScripts(scripts.script, start.script.id)
-        this.loadGameItems(items.item)
+        this.loadGameScripts(scripts, start)
+        this.loadGameItems(items)
         // this.loadGameState(state[XML_KEYS.CHILDREN])
         // this.loadGameActors(actors[XML_KEYS.CHILDREN])
         // this.loadGameScenes(scenes[XML_KEYS.CHILDREN])
@@ -93,18 +92,19 @@ export default class Game extends PureComponent {
     loadGameScripts = (scripts, startingScriptId) => {
         this.gameStartingScriptId = startingScriptId
 
-        scripts.forEach(script => {
-            const { type, id, message } = script
+        for(const scriptId in scripts){
+            const { type, message } = scripts[scriptId]
 
             switch (type) {
                 case 'message':
-                    this.gameScripts[id] = () => this.addGameMessage(message)
+                    this.gameScripts[scriptId] = () => this.addGameMessage(message)
                     break;
             
                 default:
                     break;
             }
-        })
+        }
+
         console.log('scripts loaded ', this.gameScripts)
     }
 
@@ -113,7 +113,7 @@ export default class Game extends PureComponent {
     }
 
     loadGameItems = items => {
-        
+        this.gameItems = items
         console.log('loading items ', items)
     }
 
@@ -141,36 +141,45 @@ export default class Game extends PureComponent {
 
         console.log(items)
 
-        if(Array.isArray(items)){
-            items.forEach((item, index) => {
-                const key = String(index)
-        
-                const splitLine = item.split(/{{|}}/)
-                splitLine.forEach((part, index) => {
-                    if(part.length){
-                        const combinedKey = `${key}-${index}`
-                        console.log('>>>',part)
-                        switch (part.charAt(0)) {
-                            case '$': // script
-                                const [scriptId, text] = part.substring(1).split(':')
-                                parts.push(<Link
-                                    key={combinedKey}
-                                    onPress={this.gameScripts[scriptId]}>
-                                        {text}
-                                    </Link>
-                                    )
-                                break;
+        items.forEach((item, index) => {
+            const key = String(index)
+    
+            const splitLine = item.split(/{{|}}/)
+            splitLine.forEach((part, index) => {
+                if(part.length){
+                    const combinedKey = `${key}-${index}`
+                    console.log('>>>',part)
+                    switch (part.charAt(0)) {
+                        case '$': // script
+                            const [scriptId, text] = part.substring(1).split(':')
+                            parts.push(<Link
+                                key={combinedKey}
+                                onPress={this.gameScripts[scriptId]}>
+                                    {text}
+                                </Link>
+                                )
+                            break;
                         
-                            default:  parts.push(<Label key={combinedKey}>{part}</Label>)
-                        }
-                    } 
-                })
+                        case '#': // item
+                            const itemId = part.substring(1)
+                            parts.push(<Link
+                                key={combinedKey}
+                                onPress={() => {
+                                    this.addGameMessage([this.gameItems[itemId].description])
+                                    this.gameScripts[this.gameItems[itemId].interactionScriptId]()
+                                }}>
+                                    {this.gameItems[itemId].name}
+                                </Link>
+                                )
+                            break;
+                    
+                        default:  parts.push(<Label key={combinedKey}>{part}</Label>)
+                    }
+                } 
             })
+        })
 
-            return parts
-        } else {
-            return <Label>{items}</Label>
-        }
+        return parts
     }
 
     addGameMessage = message => {
@@ -179,7 +188,7 @@ export default class Game extends PureComponent {
         const newMessagesArray = [...gameMessages]
 
         newMessagesArray.push(<View key={String(this.gameLastMessageId++)}>
-            {this.renderMessageParts(message.line)}
+            {this.renderMessageParts(message)}
         </View>)
 
         this.setState({

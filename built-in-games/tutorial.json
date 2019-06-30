@@ -18,7 +18,8 @@
         },
         "table_01": {
             "name": "table",
-            "description": "simple table, four legs, no arms. Doesn't look suspesious... to you, anyway..."
+            "description": "simple table, four legs, no arms. Doesn't look suspesious... to you, anyway...",
+            "interactionScriptId": "table_01_interaction"
         }
     },
     "start": "start_script_01",
@@ -34,6 +35,12 @@
             "type": "message",
             "message": [
                 "You are in a dark room... You see a {{#table_01}} in front of you."
+            ]
+        },
+        "table_01_interaction": {
+            "type": "message",
+            "message": [
+                "good job you clicked on the table...."
             ]
         }
     }
