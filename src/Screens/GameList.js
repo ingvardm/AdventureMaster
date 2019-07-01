@@ -4,7 +4,6 @@ import FixedHeader from '../Components/FixedHeader'
 import { ScreenTitle } from '../Components/Labels'
 import StaticList from '../Components/StaticList'
 import HeaderBackButton from '../Components/HeaderBackButton'
-import gamesList from '../built-in-games.json'
 import Button from '../Components/Buttons'
 import { StyleSheet } from 'react-native'
 import Spinner from '../Components/Spinner'
@@ -15,7 +14,7 @@ export default class GamesList extends PureComponent {
         loading: true
     }
 
-    _gameList = [...gamesList]
+    _gameList = []
 
     componentDidMount(){
         fetchGamesList()

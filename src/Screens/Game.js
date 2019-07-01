@@ -5,31 +5,10 @@ import { ScreenTitle, Label, Link, Info } from '../Components/Labels'
 import ScrollContainer from '../Components/ScrollContainer'
 import HeaderBackButton from '../Components/HeaderBackButton'
 import { fetchGame } from '../services/api'
-import {xml2objAsync} from '../utils/xml-utils'
 import Spinner from '../Components/Spinner'
 import { StyleSheet, View } from 'react-native'
-import { XML_KEYS } from '../utils/xml-utils'
 
 class GameEntry extends PureComponent {
-    _renderPart(part, index){
-        const { type } = part
-
-        switch (part.type) {
-            case XML_KEYS.CHILDREN:
-                
-                break;
-            case XML_KEYS.TEXT:
-            
-                break;
-
-            case XML_KEYS.ATTRIBUTES:
-        
-                break;
-        
-            default: throw `${type} is not a valid type must be one of [${Object.values(XML_KEYS)}]`
-        }
-    }
-
     render(){
         const { content } = this.props
         return <View style={styles.entry}>
