@@ -6,7 +6,7 @@ import ScrollContainer from '../Components/ScrollContainer'
 import HeaderBackButton from '../Components/HeaderBackButton'
 import { fetchGame } from '../services/api'
 import Spinner from '../Components/Spinner'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, FlatList } from 'react-native'
 
 class GameEntry extends PureComponent {
     render(){
@@ -33,6 +33,7 @@ export default class Game extends PureComponent {
     gameScripts = {}
     gameStartingScriptId = null
     gameLastMessageId = 0
+    gameViewport = null
 
     componentDidMount(){
         const {url, title} = this.props.navigation.getParam('game');
@@ -62,9 +63,9 @@ export default class Game extends PureComponent {
         console.log(game)
         this.loadGameScripts(scripts, start)
         this.loadGameItems(items)
-        // this.loadGameState(state[XML_KEYS.CHILDREN])
-        // this.loadGameActors(actors[XML_KEYS.CHILDREN])
-        // this.loadGameScenes(scenes[XML_KEYS.CHILDREN])
+        this.loadGameState(state)
+        this.loadGameActors(actors)
+        this.loadGameScenes(scenes)
         this.finalizeGameLoading()
     }
 
@@ -88,10 +89,11 @@ export default class Game extends PureComponent {
     }
 
     loadGameState = state => {
-
+        if(!state) return
     }
 
     loadGameItems = items => {
+        if(!items) return
         this.gameItems = items
         console.log('loading items ', items)
     }
@@ -115,6 +117,33 @@ export default class Game extends PureComponent {
         this.gameScripts[this.gameStartingScriptId]()
     }
 
+    buildGameScriptMessage = (script, customKey) => {
+        const [scriptId, text] = script.substring(1).split(':')
+        return <Link
+            key={customKey || scriptId}
+            onPress={this.gameScripts[scriptId]}>
+            {text}
+        </Link>
+    }
+
+    buildGameItemMessage = (item, customKey) => {
+        const itemId = item.substring(1)
+        const { name, description, interactionScriptId} = this.gameItems[itemId]
+        const { userKnownKeywords } = this.state
+
+        if(!userKnownKeywords.includes(itemId))
+            this.setState({userKnownKeywords: [...userKnownKeywords, itemId]})
+
+        return <Link
+            key={customKey || itemId}
+            onPress={() => {
+                this.addGameMessage([`{{!${description}}}`])
+                    .then(this.gameScripts[interactionScriptId])
+            }}>
+            {name}
+        </Link>
+    }
+
     renderMessageParts = items => {
         let parts = []
 
@@ -127,26 +156,11 @@ export default class Game extends PureComponent {
                     const combinedKey = `${key}-${index}`
                     switch (part.charAt(0)) {
                         case '$': // script
-                            const [scriptId, text] = part.substring(1).split(':')
-                            parts.push(<Link
-                                key={combinedKey}
-                                onPress={this.gameScripts[scriptId]}>
-                                    {text}
-                                </Link>
-                                )
+                            parts.push(this.buildGameScriptMessage(part))
                             break;
                         
                         case '#': // item
-                            const itemId = part.substring(1)
-                            parts.push(<Link
-                                key={combinedKey}
-                                onPress={() => {
-                                    this.addGameMessage([`{{!${this.gameItems[itemId].description}}}`])
-                                        .then(this.gameScripts[this.gameItems[itemId].interactionScriptId])
-                                }}>
-                                    {this.gameItems[itemId].name}
-                                </Link>
-                                )
+                            parts.push(this.buildGameItemMessage(part))
                             break;
 
                         case "!": // info
@@ -170,12 +184,16 @@ export default class Game extends PureComponent {
         newMessagesArray.push(<View key={String(this.gameLastMessageId++)} style={styles.entry}>
             {this.renderMessageParts(message)}
         </View>)
-
-        return new Promise(res => this.setState({ gameMessages: newMessagesArray }, res))
+        return new Promise(res => this.setState({ gameMessages: newMessagesArray }, () => {
+            requestAnimationFrame(() => {
+                this.gameViewport.scrollToEnd()
+            })
+            res()
+        }))
     }
 
     render() {
-        const { title, loading, error, gameMessages } = this.state
+        const { title, loading, error, gameMessages, userKnownKeywords } = this.state
 
         return (
         <Screen>
@@ -185,10 +203,24 @@ export default class Game extends PureComponent {
                 >
                 <ScreenTitle>{title}</ScreenTitle>
             </FixedHeader>
-            <ScrollContainer style={styles.content}>
+            <ScrollContainer
+                onRef={ref => this.gameViewport = ref}
+                contentContainerStyle={styles.scrollviewContainer}
+                style={[styles.content]}>
                 {error && <Label>error: {error.message}</Label>}
                 {gameMessages}
             </ScrollContainer>
+            <View>
+                <FlatList
+                    style={[styles.content, styles.keywords]}
+                    data={userKnownKeywords}
+                    keyExtractor={item => item}
+                    renderItem={({item,index}) => {
+                        console.log('knownkeywords',this.gameItems, item)
+                        return this.buildGameItemMessage(`#${item}`, index)
+                    }}
+                />
+            </View>
         </Screen>
         )
     }
@@ -199,12 +231,20 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingVertical: 8
     },
+    scrollviewContainer: {
+        paddingBottom: 24
+    },
     errorMessage: {
         marginTop: 64,
         alignSelf: 'center'
     },
     entry: {
         width: '100%',
-        marginTop: 16
+        paddingVertical: 8
+    },
+    keywords: {
+        backgroundColor: '#ffffff08',
+        height: 'auto',
+        maxHeight: 140
     }
 })

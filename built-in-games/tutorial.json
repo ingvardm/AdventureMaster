@@ -20,6 +20,11 @@
             "name": "table",
             "description": "simple table, four legs, no arms. Doesn't look suspesious... to you, anyway...",
             "interactionScriptId": "table_01_interaction"
+        },
+        "key_01": {
+            "name": "misterious key",
+            "description": "a misterious tutorial key",
+            "interactionScriptId": "key_01_interaction"
         }
     },
     "start": "start_script_01",
@@ -40,8 +45,12 @@
         "table_01_interaction": {
             "type": "message",
             "message": [
-                "good job you clicked on the table...."
+                "theres a {{$key_01_pickup:a misterious key}} lying on the table"
             ]
+        },
+        "key_01_pickup":{
+            "type": "pickup",
+            "item": "key_01"
         }
     }
 }
